@@ -10,6 +10,8 @@ mod player;
 pub use player::*;
 mod rect;
 pub use rect::*;
+mod visibility_system;
+pub use visibility_system::*;
 
 fn main() {
     App::new()
@@ -44,11 +46,12 @@ fn setup(mut commands: Commands) {
 
 fn tick(
     ctx: Res<BracketContext>,
-    map: Res<Map>,
+    mut map: ResMut<Map>,
     keyboard: Res<Input<KeyCode>>,
     mut queries: ParamSet<(
         Query<&mut Position, With<Player>>,
         Query<(&Position, &Renderable)>,
+        Query<(&mut Viewshed, &Position, Option<&Player>)>,
     )>,
 ) {
     ctx.cls();
@@ -63,6 +66,7 @@ fn tick(
             pos.y = min(49, max(0, pos.y + delta.1));
         }
     }
+    visibility_system(&mut map, queries.p2());
 
     draw_map(&map, &ctx);
     for (pos, render) in queries.p1().iter() {
