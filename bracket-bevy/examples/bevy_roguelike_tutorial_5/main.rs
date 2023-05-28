@@ -40,6 +40,7 @@ fn setup(mut commands: Commands) {
         .insert(Viewshed {
             visible_tiles: Vec::new(),
             range: 8,
+            dirty: true,
         })
         .insert(Player {});
 }
