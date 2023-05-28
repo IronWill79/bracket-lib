@@ -50,7 +50,7 @@ fn tick(
     mut map: ResMut<Map>,
     keyboard: Res<Input<KeyCode>>,
     mut queries: ParamSet<(
-        Query<&mut Position, With<Player>>,
+        Query<(&mut Position, &mut Viewshed), With<Player>>,
         Query<(&Position, &Renderable)>,
         Query<(&mut Viewshed, &Position, Option<&Player>)>,
     )>,
@@ -60,11 +60,13 @@ fn tick(
     let delta = player_input(&keyboard);
     if delta != (0, 0) {
         let mut player_query = queries.p0();
-        let mut pos = player_query.single_mut();
+        let (mut pos, mut viewshed) = player_query.single_mut();
         let destination_idx = map.xy_idx(pos.x + delta.0, pos.y + delta.1);
         if map.tiles[destination_idx] != TileType::Wall {
             pos.x = min(79, max(0, pos.x + delta.0));
             pos.y = min(49, max(0, pos.y + delta.1));
+
+            viewshed.dirty = true;
         }
     }
     visibility_system(&mut map, queries.p2());
