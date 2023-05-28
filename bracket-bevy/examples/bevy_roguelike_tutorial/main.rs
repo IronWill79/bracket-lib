@@ -25,7 +25,6 @@ fn main() {
 fn setup(mut commands: Commands) {
     let map = Map::new_map_rooms_and_corridors();
     let (player_x, player_y) = map.rooms[0].center();
-    commands.insert_resource(map);
     commands
         .spawn_empty()
         .insert(Position {
@@ -43,6 +42,20 @@ fn setup(mut commands: Commands) {
             dirty: true,
         })
         .insert(Player {});
+
+    for room in map.rooms.iter().skip(1) {
+        let (x, y) = room.center();
+        commands
+            .spawn_empty()
+            .insert(Position { x, y })
+            .insert(Renderable {
+                glyph: to_cp437('g'),
+                fg: RGB::named(RED),
+                bg: RGB::named(BLACK),
+            });
+    }
+
+    commands.insert_resource(map);
 }
 
 fn tick(
