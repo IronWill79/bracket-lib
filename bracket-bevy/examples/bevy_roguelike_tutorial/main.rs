@@ -10,8 +10,8 @@ mod player;
 pub use player::*;
 mod rect;
 pub use rect::*;
-mod visibility_system;
-pub use visibility_system::*;
+mod systems;
+pub use systems::*;
 
 fn main() {
     App::new()
@@ -81,6 +81,7 @@ fn tick(
         Query<(&mut Position, &mut Viewshed), With<Player>>,
         Query<(&Position, &Renderable)>,
         Query<(&mut Viewshed, &Position, Option<&Player>)>,
+        Query<(&Viewshed, &Position), With<Monster>>,
     )>,
 ) {
     ctx.cls();
@@ -98,6 +99,7 @@ fn tick(
         }
     }
     visibility_system(&mut map, queries.p2());
+    monster_ai_system(queries.p3());
 
     draw_map(&map, &ctx);
     for (pos, render) in queries.p1().iter() {
