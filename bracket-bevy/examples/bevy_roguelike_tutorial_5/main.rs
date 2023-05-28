@@ -35,6 +35,10 @@ fn setup(mut commands: Commands) {
             fg: RGB::named(YELLOW),
             bg: RGB::named(BLACK),
         })
+        .insert(Viewshed {
+            visible_tiles: Vec::new(),
+            range: 8,
+        })
         .insert(Player {});
 }
 

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bracket_bevy::prelude::RGB;
+use bracket_geometry::prelude::Point;
 
 #[derive(Component)]
 pub struct Position {
@@ -16,3 +17,9 @@ pub struct Renderable {
 
 #[derive(Component, Debug)]
 pub struct Player {}
+
+#[derive(Component)]
+pub struct Viewshed {
+    pub visible_tiles: Vec<Point>,
+    pub range: i32,
+}
