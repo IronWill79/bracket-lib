@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bracket_bevy::prelude::*;
+use bracket_bevy::{prelude::*, FontCharType};
 use std::cmp::{max, min};
 
 mod components;
@@ -43,13 +43,22 @@ fn setup(mut commands: Commands) {
         })
         .insert(Player {});
 
+    let rng = RandomNumbers::new();
     for room in map.rooms.iter().skip(1) {
         let (x, y) = room.center();
+
+        let glyph: FontCharType;
+        let roll = rng.range(1, 3);
+        match roll {
+            1 => glyph = to_cp437('g'),
+            _ => glyph = to_cp437('o'),
+        }
+
         commands
             .spawn_empty()
             .insert(Position { x, y })
             .insert(Renderable {
-                glyph: to_cp437('g'),
+                glyph,
                 fg: RGB::named(RED),
                 bg: RGB::named(BLACK),
             })
