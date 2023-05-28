@@ -52,6 +52,11 @@ fn setup(mut commands: Commands) {
                 glyph: to_cp437('g'),
                 fg: RGB::named(RED),
                 bg: RGB::named(BLACK),
+            })
+            .insert(Viewshed {
+                visible_tiles: Vec::new(),
+                range: 8,
+                dirty: true,
             });
     }
 
@@ -86,6 +91,9 @@ fn tick(
 
     draw_map(&map, &ctx);
     for (pos, render) in queries.p1().iter() {
-        ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
+        let idx = map.xy_idx(pos.x, pos.y);
+        if map.visible_tiles[idx] {
+            ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
+        }
     }
 }
