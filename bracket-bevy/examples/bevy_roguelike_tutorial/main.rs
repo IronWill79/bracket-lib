@@ -66,7 +66,8 @@ fn setup(mut commands: Commands) {
                 visible_tiles: Vec::new(),
                 range: 8,
                 dirty: true,
-            });
+            })
+            .insert(Monster {});
     }
 
     commands.insert_resource(map);
