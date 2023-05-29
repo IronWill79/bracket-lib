@@ -13,6 +13,18 @@ pub use rect::*;
 mod systems;
 pub use systems::*;
 
+#[derive(PartialEq, Copy, Clone)]
+pub enum RunState {
+    Paused,
+    Running,
+}
+
+#[derive(Resource)]
+pub struct GameState(RunState);
+
+#[derive(Resource)]
+pub struct PlayerPosition(Point);
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
@@ -71,12 +83,19 @@ fn setup(mut commands: Commands) {
     }
 
     commands.insert_resource(map);
+    commands.insert_resource(GameState(RunState::Running));
+    commands.insert_resource(PlayerPosition(Point {
+        x: player_x,
+        y: player_y,
+    }));
 }
 
 fn tick(
     ctx: Res<BracketContext>,
-    mut map: ResMut<Map>,
     keyboard: Res<Input<KeyCode>>,
+    mut map: ResMut<Map>,
+    mut player_position: ResMut<PlayerPosition>,
+    mut state: ResMut<GameState>,
     mut queries: ParamSet<(
         Query<(&mut Position, &mut Viewshed), With<Player>>,
         Query<(&Position, &Renderable)>,
@@ -86,20 +105,28 @@ fn tick(
 ) {
     ctx.cls();
 
-    let delta = player_input(&keyboard);
-    if delta != (0, 0) {
-        let mut player_query = queries.p0();
-        let (mut pos, mut viewshed) = player_query.single_mut();
-        let destination_idx = map.xy_idx(pos.x + delta.0, pos.y + delta.1);
-        if map.tiles[destination_idx] != TileType::Wall {
-            pos.x = min(79, max(0, pos.x + delta.0));
-            pos.y = min(49, max(0, pos.y + delta.1));
+    if state.0 == RunState::Running {
+        visibility_system(&mut map, queries.p2());
+        monster_ai_system(queries.p3(), &player_position);
+        state.0 = RunState::Paused;
+    } else {
+        let (delta_x, delta_y, temp_state) = player_input(&keyboard);
+        let delta = (delta_x, delta_y);
+        if delta != (0, 0) {
+            let mut player_query = queries.p0();
+            let (mut pos, mut viewshed) = player_query.single_mut();
+            let destination_idx = map.xy_idx(pos.x + delta.0, pos.y + delta.1);
+            if map.tiles[destination_idx] != TileType::Wall {
+                pos.x = min(79, max(0, pos.x + delta.0));
+                pos.y = min(49, max(0, pos.y + delta.1));
+                player_position.0.x = pos.x;
+                player_position.0.y = pos.y;
 
-            viewshed.dirty = true;
+                viewshed.dirty = true;
+            }
         }
+        state.0 = temp_state;
     }
-    visibility_system(&mut map, queries.p2());
-    monster_ai_system(queries.p3());
 
     draw_map(&map, &ctx);
     for (pos, render) in queries.p1().iter() {

@@ -2,7 +2,7 @@ use bevy::prelude::{Query, With};
 use bracket_geometry::prelude::Point;
 use bracket_pathfinding::prelude::field_of_view;
 
-use crate::{Map, Monster, Player, Position, Viewshed};
+use crate::{Map, Monster, Player, PlayerPosition, Position, Viewshed};
 
 pub fn visibility_system(
     map: &mut Map,
@@ -32,8 +32,13 @@ pub fn visibility_system(
     }
 }
 
-pub fn monster_ai_system(mut monster_query: Query<(&Viewshed, &Position), With<Monster>>) {
-    for (viewshed, position) in monster_query.iter_mut() {
-        println!("Monster considers its own existence");
+pub fn monster_ai_system(
+    mut monster_query: Query<(&Viewshed, &Position), With<Monster>>,
+    player_position: &PlayerPosition,
+) {
+    for (viewshed, _position) in monster_query.iter_mut() {
+        if viewshed.visible_tiles.contains(&player_position.0) {
+            println!("Monster shouts insults");
+        }
     }
 }
