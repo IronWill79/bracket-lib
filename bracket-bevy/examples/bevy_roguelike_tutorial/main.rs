@@ -53,17 +53,27 @@ fn setup(mut commands: Commands) {
             range: 8,
             dirty: true,
         })
+        .insert(crate::components::Name {
+            name: "Player".to_string(),
+        })
         .insert(Player {});
 
     let rng = RandomNumbers::new();
-    for room in map.rooms.iter().skip(1) {
+    for (idx, room) in map.rooms.iter().skip(1).enumerate() {
         let (x, y) = room.center();
 
         let glyph: FontCharType;
+        let name: String;
         let roll = rng.range(1, 3);
         match roll {
-            1 => glyph = to_cp437('g'),
-            _ => glyph = to_cp437('o'),
+            1 => {
+                glyph = to_cp437('g');
+                name = "Goblin".to_string();
+            }
+            _ => {
+                glyph = to_cp437('o');
+                name = "Orc".to_string();
+            }
         }
 
         commands
@@ -78,6 +88,9 @@ fn setup(mut commands: Commands) {
                 visible_tiles: Vec::new(),
                 range: 8,
                 dirty: true,
+            })
+            .insert(crate::components::Name {
+                name: format!("{} #{}", &name, idx).into(),
             })
             .insert(Monster {});
     }
@@ -100,7 +113,7 @@ fn tick(
         Query<(&mut Position, &mut Viewshed), With<Player>>,
         Query<(&Position, &Renderable)>,
         Query<(&mut Viewshed, &Position, Option<&Player>)>,
-        Query<(&Viewshed, &Position), With<Monster>>,
+        Query<(&Viewshed, &Position, &crate::components::Name), With<Monster>>,
     )>,
 ) {
     ctx.cls();
