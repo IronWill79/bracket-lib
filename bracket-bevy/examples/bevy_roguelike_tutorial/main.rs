@@ -113,14 +113,14 @@ fn tick(
         Query<(&mut Position, &mut Viewshed), With<Player>>,
         Query<(&Position, &Renderable)>,
         Query<(&mut Viewshed, &Position, Option<&Player>)>,
-        Query<(&Viewshed, &Position, &crate::components::Name), With<Monster>>,
+        Query<(&mut Viewshed, &mut Position, &crate::components::Name), With<Monster>>,
     )>,
 ) {
     ctx.cls();
 
     if state.0 == RunState::Running {
         visibility_system(&mut map, queries.p2());
-        monster_ai_system(queries.p3(), &player_position);
+        monster_ai_system(&mut map, queries.p3(), &player_position);
         state.0 = RunState::Paused;
     } else {
         let (delta_x, delta_y, temp_state) = player_input(&keyboard);

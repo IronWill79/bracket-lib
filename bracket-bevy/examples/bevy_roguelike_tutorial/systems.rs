@@ -1,6 +1,6 @@
 use bevy::prelude::{Query, With};
 use bracket_geometry::prelude::Point;
-use bracket_pathfinding::prelude::field_of_view;
+use bracket_pathfinding::prelude::{a_star_search, field_of_view};
 
 use crate::{components::Name, Map, Monster, Player, PlayerPosition, Position, Viewshed};
 
@@ -33,12 +33,24 @@ pub fn visibility_system(
 }
 
 pub fn monster_ai_system(
-    mut monster_query: Query<(&Viewshed, &Position, &Name), With<Monster>>,
+    map: &mut Map,
+    mut monster_query: Query<(&mut Viewshed, &mut Position, &Name), With<Monster>>,
     player_position: &PlayerPosition,
 ) {
-    for (viewshed, _position, name) in monster_query.iter_mut() {
+    for (mut viewshed, mut position, name) in monster_query.iter_mut() {
         if viewshed.visible_tiles.contains(&player_position.0) {
             println!("{} shouts insults", name.name);
+            let path = a_star_search(
+                map.xy_idx(position.x, position.y) as i32,
+                map.xy_idx(player_position.0.x, player_position.0.y) as i32,
+                map,
+            );
+            if path.success && path.steps.len() > 1 {
+                println!("{} steps towards you", name.name);
+                position.x = path.steps[1] as i32 % map.width;
+                position.y = path.steps[1] as i32 / map.width;
+                viewshed.dirty = true;
+            }
         }
     }
 }
