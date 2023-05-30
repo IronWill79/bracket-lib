@@ -92,6 +92,7 @@ fn setup(mut commands: Commands) {
             .insert(crate::components::Name {
                 name: format!("{} #{}", &name, idx).into(),
             })
+            .insert(BlocksTile {})
             .insert(Monster {});
     }
 
@@ -114,6 +115,7 @@ fn tick(
         Query<(&Position, &Renderable)>,
         Query<(&mut Viewshed, &Position, Option<&Player>)>,
         Query<(&mut Viewshed, &mut Position, &crate::components::Name), With<Monster>>,
+        Query<&Position, With<BlocksTile>>,
     )>,
 ) {
     ctx.cls();
@@ -121,6 +123,7 @@ fn tick(
     if state.0 == RunState::Running {
         visibility_system(&mut map, queries.p2());
         monster_ai_system(&mut map, queries.p3(), &player_position);
+        map_indexing_system(&mut map, queries.p4());
         state.0 = RunState::Paused;
     } else {
         let (delta_x, delta_y, temp_state) = player_input(&keyboard);
@@ -129,7 +132,7 @@ fn tick(
             let mut player_query = queries.p0();
             let (mut pos, mut viewshed) = player_query.single_mut();
             let destination_idx = map.xy_idx(pos.x + delta.0, pos.y + delta.1);
-            if map.tiles[destination_idx] != TileType::Wall {
+            if !map.blocked[destination_idx] {
                 pos.x = min(79, max(0, pos.x + delta.0));
                 pos.y = min(49, max(0, pos.y + delta.1));
                 player_position.0.x = pos.x;

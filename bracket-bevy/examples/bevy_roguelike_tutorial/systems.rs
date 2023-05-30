@@ -1,8 +1,10 @@
 use bevy::prelude::{Query, With};
-use bracket_geometry::prelude::Point;
+use bracket_geometry::prelude::{DistanceAlg, Point};
 use bracket_pathfinding::prelude::{a_star_search, field_of_view};
 
-use crate::{components::Name, Map, Monster, Player, PlayerPosition, Position, Viewshed};
+use crate::{
+    components::Name, BlocksTile, Map, Monster, Player, PlayerPosition, Position, Viewshed,
+};
 
 pub fn visibility_system(
     map: &mut Map,
@@ -39,7 +41,13 @@ pub fn monster_ai_system(
 ) {
     for (mut viewshed, mut position, name) in monster_query.iter_mut() {
         if viewshed.visible_tiles.contains(&player_position.0) {
-            println!("{} shouts insults", name.name);
+            let distance = DistanceAlg::Pythagoras
+                .distance2d(Point::new(position.x, position.y), player_position.0);
+            if distance < 1.5 {
+                // Attack goes here
+                println!("{} shouts insults", name.name);
+                return;
+            }
             let path = a_star_search(
                 map.xy_idx(position.x, position.y) as i32,
                 map.xy_idx(player_position.0.x, player_position.0.y) as i32,
@@ -52,5 +60,15 @@ pub fn monster_ai_system(
                 viewshed.dirty = true;
             }
         }
+    }
+}
+
+/// This system iterates through all entities with a Position and a BlocksTile component,
+/// updating the map's blocked vector with the current state
+pub fn map_indexing_system(map: &mut Map, blocked_query: Query<&Position, With<BlocksTile>>) {
+    map.populate_blocked();
+    for position in blocked_query.iter() {
+        let index = map.xy_idx(position.x, position.y);
+        map.blocked[index] = true;
     }
 }

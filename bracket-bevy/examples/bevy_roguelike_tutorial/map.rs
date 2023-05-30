@@ -115,7 +115,13 @@ impl Map {
             return false;
         }
         let idx = self.xy_idx(x, y);
-        self.tiles[idx as usize] != TileType::Wall
+        !self.blocked[idx]
+    }
+
+    pub fn populate_blocked(&mut self) {
+        for (i, tile) in self.tiles.iter_mut().enumerate() {
+            self.blocked[i] = *tile == TileType::Wall;
+        }
     }
 }
 
