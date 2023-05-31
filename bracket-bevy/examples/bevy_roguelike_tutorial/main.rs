@@ -122,7 +122,7 @@ fn tick(
 
     if state.0 == RunState::Running {
         visibility_system(&mut map, queries.p2());
-        monster_ai_system(&mut map, queries.p3(), &player_position);
+        monster_ai_system(&mut map, queries.p3(), player_position.0);
         map_indexing_system(&mut map, queries.p4());
         state.0 = RunState::Paused;
     } else {

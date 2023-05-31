@@ -2,9 +2,7 @@ use bevy::prelude::{Query, With};
 use bracket_geometry::prelude::{DistanceAlg, Point};
 use bracket_pathfinding::prelude::{a_star_search, field_of_view};
 
-use crate::{
-    components::Name, BlocksTile, Map, Monster, Player, PlayerPosition, Position, Viewshed,
-};
+use crate::{components::Name, BlocksTile, Map, Monster, Player, Position, Viewshed};
 
 pub fn visibility_system(
     map: &mut Map,
@@ -15,7 +13,7 @@ pub fn visibility_system(
             viewshed.dirty = false;
             viewshed.visible_tiles.clear();
             viewshed.visible_tiles =
-                field_of_view(Point::new(position.x, position.y), viewshed.range, &*map);
+                field_of_view(Point::new(position.x, position.y), viewshed.range, map);
             viewshed
                 .visible_tiles
                 .retain(|p| p.x >= 0 && p.x < map.width && p.y >= 0 && p.y < map.height);
@@ -37,12 +35,12 @@ pub fn visibility_system(
 pub fn monster_ai_system(
     map: &mut Map,
     mut monster_query: Query<(&mut Viewshed, &mut Position, &Name), With<Monster>>,
-    player_position: &PlayerPosition,
+    player_position: Point,
 ) {
     for (mut viewshed, mut position, name) in monster_query.iter_mut() {
-        if viewshed.visible_tiles.contains(&player_position.0) {
+        if viewshed.visible_tiles.contains(&player_position) {
             let distance = DistanceAlg::Pythagoras
-                .distance2d(Point::new(position.x, position.y), player_position.0);
+                .distance2d(Point::new(position.x, position.y), player_position);
             if distance < 1.5 {
                 // Attack goes here
                 println!("{} shouts insults", name.name);
@@ -50,7 +48,7 @@ pub fn monster_ai_system(
             }
             let path = a_star_search(
                 map.xy_idx(position.x, position.y) as i32,
-                map.xy_idx(player_position.0.x, player_position.0.y) as i32,
+                map.xy_idx(player_position.x, player_position.y) as i32,
                 map,
             );
             if path.success && path.steps.len() > 1 {
