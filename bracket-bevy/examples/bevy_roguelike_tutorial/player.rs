@@ -25,6 +25,18 @@ pub fn player_input(keyboard: &Input<KeyCode>) -> (i32, i32, RunState) {
         || keyboard.just_pressed(KeyCode::J)
     {
         result.1 = 1;
+    } else if keyboard.just_pressed(KeyCode::Numpad9) || keyboard.just_pressed(KeyCode::Y) {
+        result.0 = 1;
+        result.1 = -1;
+    } else if keyboard.just_pressed(KeyCode::Numpad7) || keyboard.just_pressed(KeyCode::U) {
+        result.0 = -1;
+        result.1 = -1;
+    } else if keyboard.just_pressed(KeyCode::Numpad3) || keyboard.just_pressed(KeyCode::N) {
+        result.0 = 1;
+        result.1 = 1;
+    } else if keyboard.just_pressed(KeyCode::Numpad1) || keyboard.just_pressed(KeyCode::B) {
+        result.0 = -1;
+        result.1 = 1;
     } else {
         result.2 = RunState::Paused;
     }
