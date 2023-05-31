@@ -1,5 +1,5 @@
 use crate::rect::Rect;
-use bevy::prelude::Resource;
+use bevy::prelude::{Entity, Resource};
 use bracket_bevy::{
     prelude::{to_cp437, RGB},
     BracketContext, FontCharType, RandomNumbers,
@@ -23,6 +23,7 @@ pub struct Map {
     pub revealed_tiles: Vec<bool>,
     pub visible_tiles: Vec<bool>,
     pub blocked: Vec<bool>,
+    pub tile_content: Vec<Vec<Entity>>,
 }
 
 impl Map {
@@ -68,6 +69,7 @@ impl Map {
             revealed_tiles: vec![false; 80 * 50],
             visible_tiles: vec![false; 80 * 50],
             blocked: vec![false; 80 * 50],
+            tile_content: vec![Vec::new(); 80 * 50],
         };
 
         const MAX_ROOMS: i32 = 30;
@@ -121,6 +123,12 @@ impl Map {
     pub fn populate_blocked(&mut self) {
         for (i, tile) in self.tiles.iter_mut().enumerate() {
             self.blocked[i] = *tile == TileType::Wall;
+        }
+    }
+
+    pub fn clear_content_index(&mut self) {
+        for content in self.tile_content.iter_mut() {
+            content.clear();
         }
     }
 }
