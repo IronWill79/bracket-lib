@@ -56,6 +56,12 @@ fn setup(mut commands: Commands) {
         .insert(crate::components::Name {
             name: "Player".to_string(),
         })
+        .insert(CombatStats {
+            max_hp: 30,
+            hp: 30,
+            defense: 2,
+            power: 5,
+        })
         .insert(Player {});
 
     let rng = RandomNumbers::new();
@@ -93,6 +99,12 @@ fn setup(mut commands: Commands) {
                 name: format!("{} #{}", &name, idx).into(),
             })
             .insert(BlocksTile {})
+            .insert(CombatStats {
+                max_hp: 16,
+                hp: 16,
+                defense: 1,
+                power: 4,
+            })
             .insert(Monster {});
     }
 
