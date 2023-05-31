@@ -1,4 +1,4 @@
-use bevy::prelude::{Query, With};
+use bevy::prelude::{Entity, Query, With};
 use bracket_geometry::prelude::{DistanceAlg, Point};
 use bracket_pathfinding::prelude::{a_star_search, field_of_view};
 
@@ -63,10 +63,19 @@ pub fn monster_ai_system(
 
 /// This system iterates through all entities with a Position and a BlocksTile component,
 /// updating the map's blocked vector with the current state
-pub fn map_indexing_system(map: &mut Map, blocked_query: Query<&Position, With<BlocksTile>>) {
+pub fn map_indexing_system(
+    map: &mut Map,
+    blocked_query: Query<(Entity, &Position, Option<&BlocksTile>)>,
+) {
     map.populate_blocked();
-    for position in blocked_query.iter() {
+    map.clear_content_index();
+    for (entity, position, _blocks_tile) in blocked_query.iter() {
         let index = map.xy_idx(position.x, position.y);
-        map.blocked[index] = true;
+
+        if let Some(_blocks_tile) = _blocks_tile {
+            map.blocked[index] = true;
+        }
+
+        map.tile_content[index].push(entity);
     }
 }

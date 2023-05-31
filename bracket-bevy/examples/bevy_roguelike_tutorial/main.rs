@@ -127,7 +127,7 @@ fn tick(
         Query<(&Position, &Renderable)>,
         Query<(&mut Viewshed, &Position, Option<&Player>)>,
         Query<(&mut Viewshed, &mut Position, &crate::components::Name), With<Monster>>,
-        Query<&Position, With<BlocksTile>>,
+        Query<(Entity, &Position, Option<&BlocksTile>)>,
     )>,
 ) {
     ctx.cls();
