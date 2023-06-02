@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use bracket_bevy::{prelude::*, FontCharType};
-use std::cmp::{max, min};
 
 mod components;
 pub use components::*;
@@ -30,7 +29,23 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(BTermBuilder::simple_80x50().with_random_number_generator(true))
         .add_startup_system(setup)
-        .add_system(tick)
+        .add_system(visibility_system.before(monster_ai_system))
+        .add_system(
+            monster_ai_system
+                .after(visibility_system)
+                .before(map_indexing_system),
+        )
+        .add_system(
+            map_indexing_system
+                .after(monster_ai_system)
+                .before(player_movement_system),
+        )
+        .add_system(
+            player_movement_system
+                .after(map_indexing_system)
+                .before(render_screen),
+        )
+        .add_system(render_screen.after(player_movement_system))
         .run();
 }
 
@@ -114,61 +129,4 @@ fn setup(mut commands: Commands) {
         x: player_x,
         y: player_y,
     }));
-}
-
-fn tick(
-    ctx: Res<BracketContext>,
-    keyboard: Res<Input<KeyCode>>,
-    mut map: ResMut<Map>,
-    mut player_position: ResMut<PlayerPosition>,
-    mut state: ResMut<GameState>,
-    mut queries: ParamSet<(
-        Query<(&mut Position, &mut Viewshed), With<Player>>,
-        Query<(&Position, &Renderable)>,
-        Query<(&mut Viewshed, &Position, Option<&Player>)>,
-        Query<(&mut Viewshed, &mut Position, &crate::components::Name), With<Monster>>,
-        Query<(Entity, &Position, Option<&BlocksTile>)>,
-    )>,
-    entity_stats_query: Query<(Entity, &CombatStats)>,
-) {
-    ctx.cls();
-
-    if state.0 == RunState::Running {
-        visibility_system(&mut map, queries.p2());
-        monster_ai_system(&mut map, queries.p3(), player_position.0);
-        map_indexing_system(&mut map, queries.p4());
-        state.0 = RunState::Paused;
-    } else {
-        let (delta_x, delta_y, temp_state) = player_input(&keyboard);
-        let delta = (delta_x, delta_y);
-        if delta != (0, 0) {
-            let mut player_query = queries.p0();
-            let (mut pos, mut viewshed) = player_query.single_mut();
-            let destination_idx = map.xy_idx(pos.x + delta.0, pos.y + delta.1);
-
-            for potential_target in map.tile_content[destination_idx].iter() {
-                if let Ok((_target, _target_stats)) = entity_stats_query.get(*potential_target) {
-                    println!("From Hell's heart, I stab at thee!!");
-                    return;
-                }
-            }
-            if !map.blocked[destination_idx] {
-                pos.x = min(79, max(0, pos.x + delta.0));
-                pos.y = min(49, max(0, pos.y + delta.1));
-                player_position.0.x = pos.x;
-                player_position.0.y = pos.y;
-
-                viewshed.dirty = true;
-            }
-        }
-        state.0 = temp_state;
-    }
-
-    draw_map(&map, &ctx);
-    for (pos, render) in queries.p1().iter() {
-        let idx = map.xy_idx(pos.x, pos.y);
-        if map.visible_tiles[idx] {
-            ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
-        }
-    }
 }
