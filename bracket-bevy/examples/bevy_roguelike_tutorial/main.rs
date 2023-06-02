@@ -14,8 +14,10 @@ pub use systems::*;
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RunState {
-    Paused,
-    Running,
+    AwaitingInput,
+    PreRun,
+    PlayerTurn,
+    MonsterTurn,
 }
 
 #[derive(Resource)]
@@ -43,9 +45,24 @@ fn main() {
         .add_system(
             player_movement_system
                 .after(map_indexing_system)
-                .before(render_screen),
+                .before(melee_combat_system),
         )
-        .add_system(render_screen.after(player_movement_system))
+        .add_system(
+            melee_combat_system
+                .after(player_movement_system)
+                .before(damage_system),
+        )
+        .add_system(
+            damage_system
+                .after(melee_combat_system)
+                .before(corpse_cleanup_system),
+        )
+        .add_system(
+            corpse_cleanup_system
+                .after(damage_system)
+                .before(render_system),
+        )
+        .add_system(render_system.after(corpse_cleanup_system))
         .run();
 }
 
@@ -124,7 +141,7 @@ fn setup(mut commands: Commands) {
     }
 
     commands.insert_resource(map);
-    commands.insert_resource(GameState(RunState::Running));
+    commands.insert_resource(GameState(RunState::PreRun));
     commands.insert_resource(PlayerPosition(Point {
         x: player_x,
         y: player_y,
