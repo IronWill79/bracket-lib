@@ -3,6 +3,8 @@ use bracket_bevy::{prelude::*, FontCharType};
 
 mod components;
 pub use components::*;
+mod gui;
+pub use gui::*;
 mod map;
 pub use map::*;
 mod player;
