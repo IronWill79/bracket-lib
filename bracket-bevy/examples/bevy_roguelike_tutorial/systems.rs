@@ -4,7 +4,7 @@ use bracket_geometry::prelude::{DistanceAlg, Point};
 use bracket_pathfinding::prelude::{a_star_search, field_of_view};
 
 use crate::{
-    components::Name, draw_map, BlocksTile, CombatStats, GameState, Map, Monster, Player,
+    components::Name, draw_map, draw_ui, BlocksTile, CombatStats, GameState, Map, Monster, Player,
     PlayerPosition, Position, Renderable, RunState, SufferDamage, Viewshed, WantsToMelee,
 };
 
@@ -201,4 +201,6 @@ pub fn render_system(
             ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
         }
     }
+
+    draw_ui(&ctx);
 }
