@@ -1,13 +1,17 @@
-use bevy::prelude::{Query, With};
+use bevy::prelude::{Query, Res, With};
 use bracket_bevy::BracketContext;
 use bracket_color::{
     prelude::{BLACK, RED, WHITE, YELLOW},
     rgb::RGB,
 };
 
-use crate::{CombatStats, Player};
+use crate::{CombatStats, GameLog, Player};
 
-pub fn draw_ui(ctx: &BracketContext, player_stats_query: Query<&CombatStats, With<Player>>) {
+pub fn draw_ui(
+    ctx: &BracketContext,
+    player_stats_query: Query<&CombatStats, With<Player>>,
+    log: Res<GameLog>,
+) {
     ctx.draw_box(0, 43, 79, 6, RGB::named(WHITE), RGB::named(BLACK));
 
     let stats = player_stats_query.single();
@@ -22,5 +26,13 @@ pub fn draw_ui(ctx: &BracketContext, player_stats_query: Query<&CombatStats, Wit
         stats.max_hp,
         RGB::named(RED),
         RGB::named(BLACK),
-    )
+    );
+
+    let mut y = 44;
+    for s in log.entries.iter().rev() {
+        if y < 49 {
+            ctx.print(2, y, s);
+        }
+        y += 1;
+    }
 }

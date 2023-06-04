@@ -3,6 +3,8 @@ use bracket_bevy::{prelude::*, FontCharType};
 
 mod components;
 pub use components::*;
+mod gamelog;
+pub use gamelog::*;
 mod gui;
 pub use gui::*;
 mod map;
@@ -148,4 +150,7 @@ fn setup(mut commands: Commands) {
         x: player_x,
         y: player_y,
     }));
+    commands.insert_resource(GameLog {
+        entries: vec!["Welcome to Rusty Roguelike".to_string()],
+    })
 }
