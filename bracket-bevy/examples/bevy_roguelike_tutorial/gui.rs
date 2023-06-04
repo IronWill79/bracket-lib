@@ -1,7 +1,7 @@
 use bevy::prelude::{Query, Res, With};
 use bracket_bevy::BracketContext;
 use bracket_color::{
-    prelude::{BLACK, RED, WHITE, YELLOW},
+    prelude::{BLACK, MAGENTA, RED, WHITE, YELLOW},
     rgb::RGB,
 };
 
@@ -35,4 +35,7 @@ pub fn draw_ui(
         }
         y += 1;
     }
+
+    let mouse_pos = ctx.get_mouse_position_for_current_layer();
+    ctx.set_bg(mouse_pos.x, mouse_pos.y, RGB::named(MAGENTA));
 }
