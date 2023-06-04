@@ -16,8 +16,9 @@ pub use states::*;
 mod systems;
 pub use systems::*;
 
-#[derive(PartialEq, Copy, Clone)]
+#[derive(PartialEq, Copy, Clone, Debug)]
 pub enum RunState {
+    PreRun,
     AwaitingInput,
     PreRun,
     PlayerTurn,
