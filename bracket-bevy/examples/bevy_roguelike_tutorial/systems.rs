@@ -45,13 +45,13 @@ pub fn visibility_system(
 pub fn monster_ai_system(
     mut commands: Commands,
     mut map: ResMut<Map>,
-    mut monster_query: Query<(&mut Viewshed, &mut Position, &Name), With<Monster>>,
+    mut monster_query: Query<(Entity, &mut Viewshed, &mut Position, &Name), With<Monster>>,
     player_position: Res<PlayerPosition>,
     player_query: Query<Entity, With<Player>>,
     state: Res<GameState>,
 ) {
     if state.0 == RunState::MonsterTurn {
-        for (mut viewshed, mut position, name) in monster_query.iter_mut() {
+        for (entity, mut viewshed, mut position, name) in monster_query.iter_mut() {
             if viewshed.visible_tiles.contains(&player_position.0) {
                 let distance = DistanceAlg::Pythagoras
                     .distance2d(Point::new(position.x, position.y), player_position.0);
@@ -60,7 +60,7 @@ pub fn monster_ai_system(
                     println!("{} shouts insults", name.name);
                     let player = player_query.single();
                     commands
-                        .entity(player)
+                        .entity(entity)
                         .insert(WantsToMelee { target: player });
                     return;
                 }
@@ -202,5 +202,5 @@ pub fn render_system(
         }
     }
 
-    draw_ui(&ctx);
+    draw_ui(&ctx, player_stats_query);
 }
