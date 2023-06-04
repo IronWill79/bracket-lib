@@ -11,6 +11,8 @@ mod player;
 pub use player::*;
 mod rect;
 pub use rect::*;
+mod states;
+pub use states::*;
 mod systems;
 pub use systems::*;
 
@@ -33,38 +35,33 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(BTermBuilder::simple_80x50().with_random_number_generator(true))
         .add_startup_system(setup)
-        .add_system(visibility_system.before(monster_ai_system))
-        .add_system(
-            monster_ai_system
-                .after(visibility_system)
-                .before(map_indexing_system),
+        .add_stage_after(
+            CoreStage::Update,
+            MONSTER_AI,
+            SystemStage::single_threaded(),
         )
-        .add_system(
-            map_indexing_system
-                .after(monster_ai_system)
-                .before(player_movement_system),
+        .add_stage_after(MONSTER_AI, MAP_INDEXING, SystemStage::single_threaded())
+        .add_stage_after(
+            MAP_INDEXING,
+            PLAYER_MOVEMENT,
+            SystemStage::single_threaded(),
         )
-        .add_system(
-            player_movement_system
-                .after(map_indexing_system)
-                .before(melee_combat_system),
+        .add_stage_after(
+            PLAYER_MOVEMENT,
+            MELEE_COMBAT,
+            SystemStage::single_threaded(),
         )
-        .add_system(
-            melee_combat_system
-                .after(player_movement_system)
-                .before(damage_system),
-        )
-        .add_system(
-            damage_system
-                .after(melee_combat_system)
-                .before(corpse_cleanup_system),
-        )
-        .add_system(
-            corpse_cleanup_system
-                .after(damage_system)
-                .before(render_system),
-        )
-        .add_system(render_system.after(corpse_cleanup_system))
+        .add_stage_after(MELEE_COMBAT, DAMAGE, SystemStage::single_threaded())
+        .add_stage_after(DAMAGE, CORPSE_CLEANUP, SystemStage::single_threaded())
+        .add_stage_after(CORPSE_CLEANUP, RENDER, SystemStage::single_threaded())
+        .add_system(visibility_system)
+        .add_system_to_stage(MONSTER_AI, monster_ai_system)
+        .add_system_to_stage(MAP_INDEXING, map_indexing_system)
+        .add_system_to_stage(PLAYER_MOVEMENT, player_movement_system)
+        .add_system_to_stage(MELEE_COMBAT, melee_combat_system)
+        .add_system_to_stage(DAMAGE, damage_system)
+        .add_system_to_stage(CORPSE_CLEANUP, corpse_cleanup_system)
+        .add_system_to_stage(RENDER, render_system)
         .run();
 }
 
