@@ -181,14 +181,21 @@ pub fn damage_system(
 }
 
 pub fn corpse_cleanup_system(
+    mut log: ResMut<GameLog>,
     mut commands: Commands,
-    corpse_query: Query<(Entity, &CombatStats, Option<&Player>)>,
+    corpse_query: Query<(
+        Entity,
+        &CombatStats,
+        &crate::components::Name,
+        Option<&Player>,
+    )>,
 ) {
-    for (entity, stats, player) in corpse_query.iter() {
+    for (entity, stats, name, player) in corpse_query.iter() {
         if stats.hp < 1 {
             if let Some(_player) = player {
                 println!("You are dead");
             } else {
+                log.entries.push(format!("{} is dead", name.name));
                 commands.entity(entity).despawn();
             }
         }
