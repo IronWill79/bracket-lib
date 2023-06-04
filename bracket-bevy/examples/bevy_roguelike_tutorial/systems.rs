@@ -4,8 +4,8 @@ use bracket_geometry::prelude::{DistanceAlg, Point};
 use bracket_pathfinding::prelude::{a_star_search, field_of_view};
 
 use crate::{
-    components::Name, draw_map, draw_ui, BlocksTile, CombatStats, GameState, Map, Monster, Player,
-    PlayerPosition, Position, Renderable, RunState, SufferDamage, Viewshed, WantsToMelee,
+    components::Name, draw_map, draw_ui, BlocksTile, CombatStats, GameLog, GameState, Map, Monster,
+    Player, PlayerPosition, Position, Renderable, RunState, SufferDamage, Viewshed, WantsToMelee,
 };
 
 pub fn visibility_system(
@@ -108,6 +108,7 @@ pub fn map_indexing_system(
 }
 
 pub fn melee_combat_system(
+    mut log: ResMut<GameLog>,
     attackers_query: Query<(
         Entity,
         &WantsToMelee,
@@ -133,8 +134,16 @@ pub fn melee_combat_system(
                         let damage = i32::max(0, stats.power - target_stats.defense);
 
                         if damage == 0 {
+                            log.entries.push(format!(
+                                "{} is unable to hurt {}",
+                                name.name, target_name.name
+                            ));
                             println!("{} is unable to hurt {}", name.name, target_name.name);
                         } else {
+                            log.entries.push(format!(
+                                "{} hits {} for {} hp",
+                                name.name, target_name.name, damage
+                            ));
                             println!("{} hits {} for {} hp", name.name, target_name.name, damage);
                             if let Some(mut suffering) = suffering {
                                 suffering.amount.push(damage);
@@ -188,6 +197,7 @@ pub fn corpse_cleanup_system(
 
 pub fn render_system(
     ctx: Res<BracketContext>,
+    log: Res<GameLog>,
     map: Res<Map>,
     renderable_query: Query<(&Position, &Renderable)>,
     player_stats_query: Query<&CombatStats, With<Player>>,
@@ -203,5 +213,5 @@ pub fn render_system(
         }
     }
 
-    draw_ui(&ctx, player_stats_query);
+    draw_ui(&ctx, player_stats_query, log);
 }
