@@ -21,7 +21,6 @@ pub use systems::*;
 pub enum RunState {
     PreRun,
     AwaitingInput,
-    PreRun,
     PlayerTurn,
     MonsterTurn,
 }
@@ -77,6 +76,7 @@ fn main() {
 }
 
 fn setup(mut commands: Commands) {
+    println!("Setup starting");
     let map = Map::new_map_rooms_and_corridors();
     let (player_x, player_y) = map.rooms[0].center();
     commands
@@ -148,6 +148,8 @@ fn setup(mut commands: Commands) {
                 power: 4,
             })
             .insert(Monster {});
+
+        println!("Setup finishing");
     }
 
     commands.insert_resource(map);

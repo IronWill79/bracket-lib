@@ -13,7 +13,12 @@ pub fn visibility_system(
     mut map: ResMut<Map>,
     mut viewshed_query: Query<(&mut Viewshed, &Position, Option<&Player>)>,
 ) {
+    println!("Visibility System - RunState = {:?}", state.0);
     if state.0 != RunState::AwaitingInput {
+        println!(
+            "Visibility System - Running - RunState should not be AwaitingInput - {:?}",
+            state.0
+        );
         for (mut viewshed, position, player) in viewshed_query.iter_mut() {
             if viewshed.dirty {
                 viewshed.dirty = false;
@@ -50,6 +55,7 @@ pub fn monster_ai_system(
     player_query: Query<Entity, With<Player>>,
     state: Res<GameState>,
 ) {
+    println!("Monster AI - RunState = {:?}", state.0);
     if state.0 == RunState::MonsterTurn {
         for (entity, mut viewshed, mut position, name) in monster_query.iter_mut() {
             if viewshed.visible_tiles.contains(&player_position.0) {
@@ -92,7 +98,12 @@ pub fn map_indexing_system(
     mut map: ResMut<Map>,
     state: Res<GameState>,
 ) {
+    println!("Map Indexing - RunState = {:?}", state.0);
     if state.0 != RunState::AwaitingInput {
+        println!(
+            "Map Indexing - Running - RunState should not be AwaitingInput - {:?}",
+            state.0
+        );
         map.populate_blocked();
         map.clear_content_index();
         for (entity, position, _blocks_tile) in blocked_query.iter() {
@@ -123,7 +134,12 @@ pub fn melee_combat_system(
         Option<&mut SufferDamage>,
     )>,
 ) {
+    println!("Melee Combat - RunState = {:?}", state.0);
     if state.0 != RunState::AwaitingInput {
+        println!(
+            "Melee Combat - Running - RunState should not be AwaitingInput - {:?}",
+            state.0
+        );
         for (attacker, wants_melee, name, stats) in attackers_query.iter() {
             if stats.hp > 0 {
                 if let Ok((target, target_name, target_stats, suffering)) =
@@ -157,7 +173,12 @@ pub fn damage_system(
     mut commands: Commands,
     mut state: ResMut<GameState>,
 ) {
+    println!("Damage - RunState = {:?}", state.0);
     if state.0 != RunState::AwaitingInput {
+        println!(
+            "Damage - Running - RunState should not be AwaitingInput - {:?}",
+            state.0
+        );
         for (entity, mut stats, damage) in attacked_query.iter_mut() {
             stats.hp -= damage.amount.iter().sum::<i32>();
             commands.entity(entity).remove::<SufferDamage>();
@@ -175,6 +196,7 @@ pub fn corpse_cleanup_system(
     mut commands: Commands,
     corpse_query: Query<(Entity, &CombatStats, Option<&Player>)>,
 ) {
+    println!("Corpse Cleanup");
     for (entity, stats, player) in corpse_query.iter() {
         if stats.hp < 1 {
             if let Some(_player) = player {
@@ -192,6 +214,7 @@ pub fn render_system(
     renderable_query: Query<(&Position, &Renderable)>,
     player_stats_query: Query<&CombatStats, With<Player>>,
 ) {
+    println!("Rendering");
     ctx.cls();
 
     draw_map(&map, &ctx);
