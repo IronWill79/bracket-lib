@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bracket_bevy::{prelude::*, FontCharType};
 
 mod components;
@@ -35,6 +36,15 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugin(BTermBuilder::simple_80x50().with_random_number_generator(true))
+        .add_plugin(WorldInspectorPlugin)
+        .register_type::<CombatStats>()
+        .register_type::<crate::components::Name>()
+        .register_type::<Position>()
+        .register_type::<Player>()
+        .register_type::<Monster>()
+        .register_type::<BlocksTile>()
+        .register_type::<WantsToMelee>()
+        .register_type::<SufferDamage>()
         .add_startup_system(setup)
         .add_stage_after(
             CoreStage::Update,

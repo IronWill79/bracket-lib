@@ -21,5 +21,6 @@ bracket-color = { path = "../bracket-color", features = [ "bevy" ] }
 bracket-geometry = { path = "../bracket-geometry", version = "~0.8", features = [ "bevy" ] }
 
 [dev-dependencies]
+bevy-inspector-egui = "0.17"
 bracket-pathfinding = { path = "../bracket-pathfinding", version = "~0.8" }
 bracket-noise = { path = "../bracket-noise", version = "~0.8" }
