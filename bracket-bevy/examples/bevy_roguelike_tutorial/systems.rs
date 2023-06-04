@@ -190,6 +190,7 @@ pub fn render_system(
     ctx: Res<BracketContext>,
     map: Res<Map>,
     renderable_query: Query<(&Position, &Renderable)>,
+    player_stats_query: Query<&CombatStats, With<Player>>,
 ) {
     ctx.cls();
 
