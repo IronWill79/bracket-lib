@@ -126,6 +126,7 @@ pub fn melee_combat_system(
 ) {
     if state.0 != RunState::AwaitingInput {
         for (attacker, wants_melee, name, stats) in attackers_query.iter() {
+            println!("{} is attacking", name.name);
             if stats.hp > 0 {
                 if let Ok((target, target_name, target_stats, suffering)) =
                     targets_query.get_mut(wants_melee.target)
@@ -206,19 +207,19 @@ pub fn render_system(
     ctx: Res<BracketContext>,
     log: Res<GameLog>,
     map: Res<Map>,
-    renderable_query: Query<(&Position, &Renderable)>,
+    renderable_query: Query<(&Position, &Renderable, &crate::components::Name)>,
     player_stats_query: Query<&CombatStats, With<Player>>,
 ) {
     ctx.cls();
 
     draw_map(&map, &ctx);
 
-    for (pos, render) in renderable_query.iter() {
+    for (pos, render, _n) in renderable_query.iter() {
         let idx = map.xy_idx(pos.x, pos.y);
         if map.visible_tiles[idx] {
             ctx.set(pos.x, pos.y, render.fg, render.bg, render.glyph);
         }
     }
 
-    draw_ui(&ctx, player_stats_query, log);
+    draw_ui(&ctx, player_stats_query, log, map, renderable_query);
 }
