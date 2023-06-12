@@ -7,7 +7,7 @@ use crate::{
 };
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
-    prelude::{CoreStage, Plugin, SystemStage, Resource},
+    prelude::{CoreSet, IntoSystemSetConfig, Plugin, Resource, SystemSet},
     utils::HashMap,
 };
 use bracket_color::prelude::RGBA;
@@ -174,9 +174,17 @@ impl BTermBuilder {
     }
 }
 
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
+#[system_set(base)]
+pub struct BracketTermDiagnostics;
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
+#[system_set(base)]
+pub struct BracketTermUpdate;
+
 impl Plugin for BTermBuilder {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.insert_resource(bevy::prelude::Msaa { samples: 1 });
+        app.insert_resource(bevy::prelude::Msaa::Sample2);
         if self.with_diagnostics {
             app.add_plugin(FrameTimeDiagnosticsPlugin);
         }
@@ -187,19 +195,16 @@ impl Plugin for BTermBuilder {
         app.insert_resource(ScreenScaler::new(self.gutter));
         app.add_startup_system(load_terminals);
         if self.with_diagnostics {
-            app.add_stage_before(
-                CoreStage::Update,
-                "bracket_term_diagnostics",
-                SystemStage::single_threaded(),
-            );
+            app.configure_set(BracketTermDiagnostics.before(CoreSet::Update));
+            // app.add_stage_before(
+            //     CoreStage::Update,
+            //     "bracket_term_diagnostics",
+            //     SystemStage::single_threaded(),
+            // );
             app.add_system(update_timing);
             app.add_system(update_mouse_position);
         }
-        app.add_stage_after(
-            CoreStage::Update,
-            "bracket_term_update",
-            SystemStage::single_threaded(),
-        );
+        app.configure_set(BracketTermUpdate.after(CoreSet::Update));
         if self.auto_apply_batches {
             app.add_system(apply_all_batches);
         }
