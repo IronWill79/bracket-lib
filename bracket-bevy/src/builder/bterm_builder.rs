@@ -196,11 +196,6 @@ impl Plugin for BTermBuilder {
         app.add_startup_system(load_terminals);
         if self.with_diagnostics {
             app.configure_set(BracketTermDiagnostics.before(CoreSet::Update));
-            // app.add_stage_before(
-            //     CoreStage::Update,
-            //     "bracket_term_diagnostics",
-            //     SystemStage::single_threaded(),
-            // );
             app.add_system(update_timing);
             app.add_system(update_mouse_position);
         }
