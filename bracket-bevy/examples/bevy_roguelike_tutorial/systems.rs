@@ -126,7 +126,6 @@ pub fn melee_combat_system(
 ) {
     if state.0 != RunState::AwaitingInput {
         for (attacker, wants_melee, name, stats) in attackers_query.iter() {
-            println!("{} is attacking", name.name);
             if stats.hp > 0 {
                 if let Ok((target, target_name, target_stats, suffering)) =
                     targets_query.get_mut(wants_melee.target)
