@@ -64,6 +64,7 @@ pub fn player_movement_system(
                 if let Ok((target, _target_stats)) = target_query.get(*potential_target) {
                     println!("From Hell's heart, I stab at thee!!");
                     commands.entity(player).insert(WantsToMelee { target });
+                    state.0 = temp_state;
                     return;
                 }
             }
